@@ -18,10 +18,30 @@ def draw_grid():
             print "***"*width_and_height
 
 
+def current_player_marker():
+    if human_turn:
+        return human_marker
+    else:
+        return computer_marker
+
+
+def mark_cell(cell):
+    cell -= 1 # grid starts at 0, grid display starts at 1
+    cell_list[cell] = current_player_marker()
+
 width_and_height = 3
 cell_list = [' '] * width_and_height**2
+winner = None
+human_turn = True
+human_marker = 'O'
+computer_marker = 'X'
+
 draw_grid()
 cell_to_mark = input('Welcome to tic tac toe, human. Pick your cell: ')
-cell_to_mark -= 1 # grid starts at 0, grid display starts at 1
-cell_list[cell_to_mark] = '0'
-draw_grid()
+mark_cell(cell_to_mark)
+
+while winner == None:
+    human_turn = not human_turn
+    draw_grid()
+    cell_to_mark = input("Your move, human. Remember, you're O: ")
+    mark_cell(cell_to_mark)
