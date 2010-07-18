@@ -37,12 +37,46 @@ def check_for_win():
                 is_winner = check_for_vertical_win(i, marker)
                 if is_winner:
                     return True
+            if cell_list[i*width_and_height] == marker:
+                is_winner = check_for_horizontal_win(i*width_and_height, marker)
+                if is_winner:
+                    return True
+            is_winner = check_for_left_diagonal_win(marker)
+            if is_winner:
+                return True
+            is_winner = check_for_right_diagonal_win(marker)
+            if is_winner:
+                return True
     return None
 
 def check_for_vertical_win(column, marker):
     maybe_winner = True
     for j in range (1, width_and_height):
         if cell_list[column+(j*width_and_height)] != marker:
+            maybe_winner = False
+            break
+    return maybe_winner
+
+def check_for_horizontal_win(row, marker):
+    maybe_winner = True
+    for j in range (1, width_and_height):
+        if cell_list[row+j] != marker:
+            maybe_winner = False
+            break
+    return maybe_winner
+
+def check_for_left_diagonal_win(marker):
+    maybe_winner = True
+    for i in range (width_and_height):
+        if cell_list[i+(i*width_and_height)] != marker:
+            maybe_winner = False
+            break
+    return maybe_winner
+
+def check_for_right_diagonal_win(marker):
+    maybe_winner = True
+    for i in range (width_and_height):
+        if cell_list[width_and_height-1+(i*(width_and_height-1))] != marker:
             maybe_winner = False
             break
     return maybe_winner
