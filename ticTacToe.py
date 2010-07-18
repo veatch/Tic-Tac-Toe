@@ -19,7 +19,7 @@ def draw_grid():
 
 
 def current_player_marker():
-    if human_turn:
+    if is_human_turn:
         return human_marker
     else:
         return computer_marker
@@ -29,10 +29,28 @@ def mark_cell(cell):
     cell -= 1 # grid starts at 0, grid display starts at 1
     cell_list[cell] = current_player_marker()
 
+def check_for_win():
+    if cell_list.count(current_player_marker()) >= width_and_height:
+        for i in range(width_and_height):
+            marker = current_player_marker()
+            if cell_list[i] == marker:
+                is_winner = check_for_vertical_win(i, marker)
+                if is_winner:
+                    return True
+    return None
+
+def check_for_vertical_win(column, marker):
+    maybe_winner = True
+    for j in range (1, width_and_height):
+        if cell_list[column+(j*width_and_height)] != marker:
+            maybe_winner = False
+            break
+    return maybe_winner
+
 width_and_height = 3
 cell_list = [' '] * width_and_height**2
 winner = None
-human_turn = True
+is_human_turn = True
 human_marker = 'O'
 computer_marker = 'X'
 
@@ -41,7 +59,13 @@ cell_to_mark = input('Welcome to tic tac toe, human. Pick your cell: ')
 mark_cell(cell_to_mark)
 
 while winner == None:
-    human_turn = not human_turn
+    is_human_turn = not is_human_turn
     draw_grid()
     cell_to_mark = input("Your move, human. Remember, you're O: ")
     mark_cell(cell_to_mark)
+    winner = check_for_win()
+
+if is_human_turn:
+    print "human wins? wtf"
+else:
+    print "I WIN"
