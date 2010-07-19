@@ -82,7 +82,7 @@ def check_for_right_diagonal_win(list_to_check, marker):
     return maybe_winner
 
 def is_valid_input(cell_to_mark):
-    if 0 < cell_to_mark <= width_and_height**2:
+    if 0 <= cell_to_mark < width_and_height**2:
         if cell_list[cell_to_mark] != ' ':
             print "That cell is already marked. Try again."
             return False
@@ -91,10 +91,13 @@ def is_valid_input(cell_to_mark):
     return False
 
 def computer_move():
-    index = is_near_win(computer_marker)
+    index = is_near_win(cell_list, computer_marker)
     if index >= 0:
         return index
-    index = is_near_win(human_marker)
+    index = is_near_win(cell_list, human_marker)
+    if index >= 0:
+        return index
+    index = find_move_with_fewest_human_wins()
     if index >= 0:
         return index
     index = width_and_height/2 # center column
@@ -103,11 +106,11 @@ def computer_move():
         return index
     return cell_list.index(' ');
 
-def is_near_win(marker): 
-    if cell_list.count(marker) >= width_and_height-1:
+def is_near_win(list_to_check, marker): 
+    if list_to_check.count(marker) >= width_and_height-1:
         open_space = 0;
         for i in range ((width_and_height**2)-1):
-            temp_list = cell_list[:]
+            temp_list = list_to_check[:]
             try:
                 open_space = temp_list.index(' ', open_space)
                 temp_list[open_space] = marker
@@ -117,6 +120,37 @@ def is_near_win(marker):
             except ValueError:
                 pass
             open_space += 1
+    return -1
+
+#loops here should be changed to bump up j when open_space is bumped up, or something
+def find_move_with_fewest_human_wins():
+    open_space = 0
+    for i in range ((width_and_height**2)-1):
+        temp_list = cell_list[:]
+        try:
+            open_space = temp_list.index(' ', open_space)
+            temp_list[open_space] = computer_marker
+            index = is_near_win(temp_list, computer_marker)
+            if index >= 0:
+                temp_list[index] = human_marker
+                finishing_open_space = 0
+                possible_wins = 0
+                for j in range ((width_and_height**2)-1):
+                    finishing_list = temp_list[:]
+                    try:
+                        finishing_open_space = finishing_list.index(' ', finishing_open_space)
+                        finishing_list[finishing_open_space] = human_marker
+                        win = check_for_win(finishing_list, human_marker)
+                        if win:
+                            possible_wins+= 1
+                    except ValueError:
+                        pass
+                    finishing_open_space += 1
+                if possible_wins <= 1:
+                    return open_space
+        except ValueError:
+            pass
+        open_space += 1
     return -1
 
 width_and_height = 3
