@@ -1,21 +1,23 @@
 def draw_grid():
     for i in range(width_and_height):
         row = ""
+        top_row = ""
+        bottom_row = ""
         for j in range(width_and_height):
-            row += "%s " % (j+1+(width_and_height*i))
+            cell_number = j+(width_and_height*i)
+            if cell_list[cell_number] == ' ':
+                top_row += "%s " % (cell_number + 1) #grid starts at 0, display starts at 1
+            else:
+                top_row += '  '
             if j % width_and_height != width_and_height-1:
-                row += "*"
-        print row
-        #print "%s *%s *%s" % (1+(width_and_height*i), 2+(width_and_height*i), 3+(width_and_height*i))
-        row = ""
-        for j in range(width_and_height):
-            row += " %s" % (cell_list[j+(width_and_height*i)])
+                top_row += " *"
+            bottom_row += "  %s" % (cell_list[cell_number])
             if j % width_and_height != width_and_height-1:
-                row += "*"
-        print row
-        #print " %s* %s* %s" % (cell_list[i])
+                bottom_row += "*"
+        print top_row
+        print bottom_row
         if i != width_and_height-1:
-            print "***"*width_and_height
+            print "****"*width_and_height
 
 
 def current_player_marker():
@@ -125,33 +127,60 @@ def is_near_win(list_to_check, marker):
 #loops here should be changed to bump up j when open_space is bumped up, or something
 def find_move_with_fewest_human_wins():
     open_space = 0
+    #iterate over grid
     for i in range ((width_and_height**2)-1):
         temp_list = cell_list[:]
         try:
             open_space = temp_list.index(' ', open_space)
+            #try marking open space with computer_marker
             temp_list[open_space] = computer_marker
+            #if that sets up a computer win, assume human will block
             index = is_near_win(temp_list, computer_marker)
             if index >= 0:
                 temp_list[index] = human_marker
                 finishing_open_space = 0
                 possible_wins = 0
+                #after human block, check remaining empty spaces
                 for j in range ((width_and_height**2)-1):
                     finishing_list = temp_list[:]
                     try:
                         finishing_open_space = finishing_list.index(' ', finishing_open_space)
                         finishing_list[finishing_open_space] = human_marker
                         win = check_for_win(finishing_list, human_marker)
+                        #count how many spaces could be human wins
                         if win:
                             possible_wins+= 1
                     except ValueError:
                         pass
                     finishing_open_space += 1
+                #if 1 or 0, computer will be able to block, so return the original open space
                 if possible_wins <= 1:
                     return open_space
         except ValueError:
             pass
+        #otherwise, there are more human wins available than can be blocked, so try next space
         open_space += 1
     return -1
+
+def next_move():
+    if is_human_turn:
+        valid = False
+        if not first_move:
+            cmd_line_messg = "Your move, human. Remember, you're O: "
+        else:
+            cmd_line_messg = 'Welcome to tic tac toe, human. Pick your cell: '
+        while not valid:
+            try:
+                cell_to_mark = int(raw_input(cmd_line_messg))-1 #grid starts at 0, display starts at 1
+                valid = is_valid_input(cell_to_mark)
+            except ValueError:
+                print "That input is not valid. Try one of the numbers on the grid."
+    else:
+        print
+        print "Let's see..."
+        print
+        cell_to_mark = computer_move()
+    mark_cell(cell_to_mark, current_player_marker())
 
 width_and_height = 3
 cell_list = [' '] * width_and_height**2
@@ -159,31 +188,23 @@ winner = None
 is_human_turn = True
 human_marker = 'O'
 computer_marker = 'X'
+first_move = True
 
 draw_grid()
-#todo update first move:
-cell_to_mark = input('Welcome to tic tac toe, human. Pick your cell: ')-1
-mark_cell(cell_to_mark, current_player_marker())
+next_move()
+first_move = False
 
 while winner == None:
     is_human_turn = not is_human_turn
     draw_grid()
-    if is_human_turn:
-        valid = False
-        while not valid:
-            try:
-                cell_to_mark = int(raw_input("Your move, human. Remember, you're O: "))-1 #grid starts at 0, display starts at 1
-                valid = is_valid_input(cell_to_mark)
-            except ValueError:
-                print "That input is not valid. Try one of the numbers on the grid."
-    else:
-        cell_to_mark = computer_move()
-    mark_cell(cell_to_mark, current_player_marker())
+    next_move()
     winner = check_for_win(cell_list, current_player_marker())
 
+draw_grid()
+print
 if winner == "draw":
     print "It's a draw!"
 elif is_human_turn:
-    print "human wins? wtf"
+    print "You won?? That's impossible!"
 else:
     print "I WIN"
